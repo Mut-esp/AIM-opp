@@ -1,6 +1,6 @@
 import type { Opportunity } from '../types'
 
-export const opportunities: Opportunity[] = [
+const baseOpportunities: Opportunity[] = [
   { id: 'my-digital', title: 'Malaysia Digital Challenge 2025', provider: 'MDEC', category: 'Competition', state: 'Kuala Lumpur', district: 'Bangsar South', interests: ['Technology', 'Leadership'], education: ['Secondary', 'Pre-university', 'University'], audience: 'Youth 18–30', date: '18 Jan 2025', deadline: '04 Jan 2025', fee: 0, format: 'Hybrid', difficulty: 'Intermediate', description: 'Build a digital solution for a real Malaysian community challenge with mentors from the local tech ecosystem.', venue: 'Online + MDEC, Bangsar South', materials: 'A team of 2–4 and a one-page idea brief.', featured: true, sample: true, registrationUrl: 'https://mdec.my/' },
   { id: 'penang-maker', title: 'Maker Lab: From Idea to Prototype', provider: 'Penang Science Cluster', category: 'Workshop', state: 'Penang', district: 'George Town', interests: ['Technology', 'Science', 'Arts'], education: ['Secondary', 'Pre-university', 'University'], audience: 'Students 15+', date: '22 Feb 2025', deadline: '15 Feb 2025', fee: 25, format: 'In person', difficulty: 'Beginner', description: 'A hands-on Saturday learning electronics, rapid prototyping and pitching through a guided mini build.', venue: 'Penang Science Cluster, George Town', materials: 'Laptop recommended. All hardware is provided.', sample: true, registrationUrl: 'https://example.com/' },
   { id: 'sarawak-scholar', title: 'Sarawak Future Leaders Award', provider: 'Yayasan Sarawak', category: 'Scholarship', state: 'Sarawak', district: 'Kuching', interests: ['Leadership', 'Career development'], education: ['University', 'Graduate'], audience: 'Sarawakian students', date: '01 Mar 2025', deadline: '31 Jan 2025', fee: 0, format: 'Online', difficulty: 'Advanced', description: 'A sample scholarship pathway for high-potential Sarawakian students pursuing priority fields.', venue: 'Online application', materials: 'Academic transcript, personal statement and two references.', sample: true, registrationUrl: 'https://yayasansarawak.org.my/' },
@@ -12,6 +12,65 @@ export const opportunities: Opportunity[] = [
   { id: 'perak-biz', title: 'Young Founders Microgrant', provider: 'Perak Entrepreneur Centre', category: 'Scholarship', state: 'Perak', district: 'Ipoh', interests: ['Business', 'Leadership'], education: ['University', 'Graduate', 'Open to all'], audience: 'Perak youth founders', date: 'Rolling intake', deadline: '30 Apr 2025', fee: 0, format: 'Hybrid', difficulty: 'Advanced', description: 'Small grants and coaching for young people testing a community-minded business idea.', venue: 'Ipoh + online', materials: 'A simple budget and a two-minute pitch video.', sample: true, registrationUrl: 'https://example.com/' },
   { id: 'melaka-heritage', title: 'Heritage Stories: Street Archive', provider: 'Ruang Seni Melaka', category: 'Workshop', state: 'Melaka', district: 'Bandar Hilir', interests: ['Arts', 'Community service'], education: ['Secondary', 'Pre-university', 'University', 'Open to all'], audience: 'Local storytellers', date: '15 Mar 2025', deadline: '08 Mar 2025', fee: 0, format: 'In person', difficulty: 'Beginner', description: 'Learn ethical oral-history interviewing and create a small digital story about Bandar Hilir.', venue: 'Ruang Seni Melaka, Bandar Hilir', materials: 'Phone with camera and curiosity.', sample: true, registrationUrl: 'https://example.com/' },
 ]
+
+type JobLocation = {
+  state: string
+  district: string
+  provider: string
+  prefix: string
+  venue: string
+}
+
+const jobLocations: JobLocation[] = [
+  { state: 'Kuala Lumpur', district: 'Bukit Bintang', provider: 'KL Youth Works', prefix: 'City Event', venue: 'Bukit Bintang, Kuala Lumpur' },
+  { state: 'Penang', district: 'George Town', provider: 'Penang Skills Network', prefix: 'Island Support', venue: 'George Town, Penang' },
+  { state: 'Sarawak', district: 'Kuching', provider: 'Kuching Community Hub', prefix: 'River City', venue: 'Kuching, Sarawak' },
+  { state: 'Selangor', district: 'Shah Alam', provider: 'Selangor Youth Works', prefix: 'Shah Alam', venue: 'Shah Alam, Selangor' },
+  { state: 'Johor', district: 'Johor Bahru', provider: 'Johor Student Connect', prefix: 'Southern', venue: 'Johor Bahru, Johor' },
+  { state: 'Putrajaya', district: 'Presint 9', provider: 'Putrajaya Community Desk', prefix: 'Civic', venue: 'Presint 9, Putrajaya' },
+  { state: 'Sabah', district: 'Kota Kinabalu', provider: 'Sabah Youth Collective', prefix: 'Borneo', venue: 'Kota Kinabalu, Sabah' },
+  { state: 'Perak', district: 'Ipoh', provider: 'Perak Career Bridge', prefix: 'Ipoh', venue: 'Ipoh, Perak' },
+  { state: 'Melaka', district: 'Bandar Hilir', provider: 'Melaka Creative Network', prefix: 'Heritage', venue: 'Bandar Hilir, Melaka' },
+]
+
+const jobLevels: Array<{
+  difficulty: Opportunity['difficulty']
+  title: string
+  interests: string[]
+  education: Opportunity['education']
+  audience: string
+  fee: number
+  description: string
+  materials: string
+}> = [
+  { difficulty: 'Beginner', title: 'Event Crew Assistant', interests: ['Community service', 'Career development'], education: ['Open to all'], audience: 'Youth 18+', fee: 60, description: 'A paid short-term shift helping with guest check-in, directions and simple event setup. Briefing is provided on arrival.', materials: 'Comfortable shoes and a half-day commitment.' },
+  { difficulty: 'Intermediate', title: 'Community Tutor', interests: ['Science', 'Community service', 'Career development'], education: ['University', 'Graduate'], audience: 'Students with subject knowledge', fee: 45, description: 'A paid weekly opportunity to support younger learners with homework, study habits and confidence building.', materials: 'Relevant subject knowledge and a short introduction.' },
+  { difficulty: 'Advanced', title: 'Digital Project Assistant', interests: ['Technology', 'Business', 'Leadership'], education: ['University', 'Graduate'], audience: 'Students with a project portfolio', fee: 150, description: 'Support a small local organisation with research, spreadsheets and digital communications on a short project.', materials: 'Laptop, portfolio or examples of previous work.' },
+]
+
+const localJobExamples: Opportunity[] = jobLocations.flatMap((location) => jobLevels.map((level, index) => ({
+  id: `${location.state.toLowerCase().replace(/ /g, '-')}-job-${index + 1}`,
+  title: `${location.prefix} ${level.title}`,
+  provider: location.provider,
+  category: 'Odd job',
+  state: location.state,
+  district: location.district,
+  interests: level.interests,
+  education: level.education,
+  audience: level.audience,
+  date: index === 0 ? 'Rolling shifts' : index === 1 ? 'Every weekend' : 'Short project',
+  deadline: 'Rolling applications',
+  fee: level.fee,
+  format: index === 2 ? 'Hybrid' : 'In person',
+  difficulty: level.difficulty,
+  description: level.description,
+  venue: location.venue,
+  materials: level.materials,
+  sample: true,
+  registrationUrl: 'https://example.com/',
+})))
+
+export const opportunities: Opportunity[] = [...baseOpportunities, ...localJobExamples]
 
 export const states = ['All Malaysia', ...Array.from(new Set(opportunities.map((item) => item.state)))]
 export const categories = ['All categories', 'Competition', 'Workshop', 'Scholarship', 'Community', 'Spiritual', 'Odd job']

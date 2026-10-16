@@ -1,6 +1,6 @@
-# Pathway Explorer
+# AIM OPP
 
-Pathway Explorer is a Malaysia-focused discovery prototype for opportunities, community programmes, spiritual activities, scholarships, workshops and legitimate short-term work.
+AIM OPP (AIM opportunities) is a Malaysia-focused discovery prototype for opportunities, community programmes, spiritual activities, scholarships, workshops and legitimate short-term work. The home flow starts with a simple area form, then reveals one matching opportunity at a time.
 
 ## Run locally
 
@@ -19,7 +19,7 @@ npm run dev
 - `src/styles/tokens.css` is the central theme layer for colors, surfaces, spacing, radii, shadows and motion.
 - `src/styles/global.css` contains the reset, spatial primitives and responsive composition.
 
-The interface uses layered surfaces intentionally: atmospheric canvas, workspace, floating controls, and the detail drawer. Add new components by consuming the existing tokens and surface patterns instead of introducing hardcoded colors or shadows.
+The interface uses layered surfaces intentionally: atmospheric canvas, workspace, floating controls, and the detail drawer. The presentation uses a 4:3 aspect ratio on desktop and becomes a readable stacked layout on mobile. Filters are intentionally hidden behind the Filters button and can be edited after discovery. Add new components by consuming the existing tokens and surface patterns instead of introducing hardcoded colors or shadows.
 
 ## Limitations and next steps
 
