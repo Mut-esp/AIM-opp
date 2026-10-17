@@ -25,6 +25,21 @@ export interface Opportunity {
   registrationUrl: string
 }
 
+export interface Shop {
+  id: string
+  name: string
+  category: string
+  description: string
+  state: string
+  district: string
+  location: string
+  price: string
+  rating: number
+  reviewCount: number
+  likes: number
+  sample: boolean
+}
+
 export interface OrganizerRating {
   stars: number
   feedback: string

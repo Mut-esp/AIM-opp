@@ -1,7 +1,7 @@
-import type { Opportunity } from '../types'
+import type { Opportunity, Shop } from '../types'
 
 const baseOpportunities: Opportunity[] = [
-  { id: 'my-digital', title: 'Malaysia Digital Challenge 2025', provider: 'MDEC', category: 'Competition', state: 'Kuala Lumpur', district: 'Bangsar South', interests: ['Technology', 'Leadership'], education: ['Secondary', 'Pre-university', 'University'], audience: 'Youth 18–30', date: '18 Jan 2025', deadline: '04 Jan 2025', fee: 0, format: 'Hybrid', difficulty: 'Intermediate', description: 'Build a digital solution for a real Malaysian community challenge with mentors from the local tech ecosystem.', venue: 'Online + MDEC, Bangsar South', materials: 'A team of 2–4 and a one-page idea brief.', featured: true, sample: true, registrationUrl: 'https://mdec.my/' },
+  { id: 'my-digital', title: 'Malaysia Digital Challenge 2025', provider: 'MDEC', category: 'Competition', state: 'Selangor', district: 'Petaling', interests: ['Technology', 'Leadership'], education: ['Secondary', 'Pre-university', 'University'], audience: 'Youth 18–30', date: '18 Jan 2025', deadline: '04 Jan 2025', fee: 0, format: 'Hybrid', difficulty: 'Intermediate', description: 'Build a digital solution for a real Malaysian community challenge with mentors from the local tech ecosystem.', venue: 'Online + MDEC, Petaling', materials: 'A team of 2–4 and a one-page idea brief.', featured: true, sample: true, registrationUrl: 'https://mdec.my/' },
   { id: 'penang-maker', title: 'Maker Lab: From Idea to Prototype', provider: 'Penang Science Cluster', category: 'Workshop', state: 'Penang', district: 'George Town', interests: ['Technology', 'Science', 'Arts'], education: ['Secondary', 'Pre-university', 'University'], audience: 'Students 15+', date: '22 Feb 2025', deadline: '15 Feb 2025', fee: 25, format: 'In person', difficulty: 'Beginner', description: 'A hands-on Saturday learning electronics, rapid prototyping and pitching through a guided mini build.', venue: 'Penang Science Cluster, George Town', materials: 'Laptop recommended. All hardware is provided.', sample: true, registrationUrl: 'https://example.com/' },
   { id: 'sarawak-scholar', title: 'Sarawak Future Leaders Award', provider: 'Yayasan Sarawak', category: 'Scholarship', state: 'Sarawak', district: 'Kuching', interests: ['Leadership', 'Career development'], education: ['University', 'Graduate'], audience: 'Sarawakian students', date: '01 Mar 2025', deadline: '31 Jan 2025', fee: 0, format: 'Online', difficulty: 'Advanced', description: 'A sample scholarship pathway for high-potential Sarawakian students pursuing priority fields.', venue: 'Online application', materials: 'Academic transcript, personal statement and two references.', sample: true, registrationUrl: 'https://yayasansarawak.org.my/' },
   { id: 'qurban-aid', title: 'Qurban Community Crew', provider: 'Masjid Al-Hidayah', category: 'Spiritual', state: 'Selangor', district: 'Petaling Jaya', interests: ['Spirituality', 'Community service'], education: ['Open to all'], audience: 'Local community', date: '06 Jun 2025', deadline: '30 May 2025', fee: 0, format: 'In person', difficulty: 'Beginner', description: 'Help coordinate packing and neighbourhood distribution for the community qurban programme.', venue: 'Masjid Al-Hidayah, Petaling Jaya', materials: 'Comfortable clothing and a willingness to help. Briefing provided.', sample: true, registrationUrl: 'https://example.com/' },
@@ -22,15 +22,15 @@ type JobLocation = {
 }
 
 const jobLocations: JobLocation[] = [
-  { state: 'Kuala Lumpur', district: 'Bukit Bintang', provider: 'KL Youth Works', prefix: 'City Event', venue: 'Bukit Bintang, Kuala Lumpur' },
-  { state: 'Penang', district: 'George Town', provider: 'Penang Skills Network', prefix: 'Island Support', venue: 'George Town, Penang' },
-  { state: 'Sarawak', district: 'Kuching', provider: 'Kuching Community Hub', prefix: 'River City', venue: 'Kuching, Sarawak' },
-  { state: 'Selangor', district: 'Shah Alam', provider: 'Selangor Youth Works', prefix: 'Shah Alam', venue: 'Shah Alam, Selangor' },
-  { state: 'Johor', district: 'Johor Bahru', provider: 'Johor Student Connect', prefix: 'Southern', venue: 'Johor Bahru, Johor' },
-  { state: 'Putrajaya', district: 'Presint 9', provider: 'Putrajaya Community Desk', prefix: 'Civic', venue: 'Presint 9, Putrajaya' },
-  { state: 'Sabah', district: 'Kota Kinabalu', provider: 'Sabah Youth Collective', prefix: 'Borneo', venue: 'Kota Kinabalu, Sabah' },
-  { state: 'Perak', district: 'Ipoh', provider: 'Perak Career Bridge', prefix: 'Ipoh', venue: 'Ipoh, Perak' },
-  { state: 'Melaka', district: 'Bandar Hilir', provider: 'Melaka Creative Network', prefix: 'Heritage', venue: 'Bandar Hilir, Melaka' },
+  { state: 'Selangor', district: 'Petaling', provider: 'Petaling Youth Works', prefix: 'Petaling', venue: 'Petaling, Selangor' },
+  { state: 'Selangor', district: 'Klang', provider: 'Klang Skills Network', prefix: 'Klang', venue: 'Klang, Selangor' },
+  { state: 'Selangor', district: 'Hulu Langat', provider: 'Hulu Langat Community Hub', prefix: 'Hulu Langat', venue: 'Hulu Langat, Selangor' },
+  { state: 'Selangor', district: 'Sepang', provider: 'Sepang Youth Works', prefix: 'Sepang', venue: 'Sepang, Selangor' },
+  { state: 'Selangor', district: 'Gombak', provider: 'Gombak Student Connect', prefix: 'Gombak', venue: 'Gombak, Selangor' },
+  { state: 'Selangor', district: 'Kuala Selangor', provider: 'Kuala Selangor Community Desk', prefix: 'Kuala Selangor', venue: 'Kuala Selangor, Selangor' },
+  { state: 'Selangor', district: 'Hulu Selangor', provider: 'Hulu Selangor Youth Collective', prefix: 'Hulu Selangor', venue: 'Hulu Selangor, Selangor' },
+  { state: 'Selangor', district: 'Sabak Bernam', provider: 'Sabak Bernam Career Bridge', prefix: 'Sabak Bernam', venue: 'Sabak Bernam, Selangor' },
+  { state: 'Selangor', district: 'Kuala Langat', provider: 'Kuala Langat Creative Network', prefix: 'Kuala Langat', venue: 'Kuala Langat, Selangor' },
 ]
 
 const jobLevels: Array<{
@@ -73,5 +73,18 @@ const localJobExamples: Opportunity[] = jobLocations.flatMap((location) => jobLe
 export const opportunities: Opportunity[] = [...baseOpportunities, ...localJobExamples]
 
 export const states = ['All Malaysia', ...Array.from(new Set(opportunities.map((item) => item.state)))]
+export const districts = Array.from(new Set(opportunities.map((item) => item.district)))
 export const categories = ['All categories', 'Competition', 'Workshop', 'Scholarship', 'Community', 'Spiritual', 'Odd job']
 export const interests = ['Technology', 'Business', 'Arts', 'Sports', 'Science', 'Leadership', 'Volunteering', 'Career development', 'Spirituality', 'Community service']
+
+export const shops: Shop[] = [
+  { id: 'goreng-pisang-waris', name: 'Goreng Pisang Waris', category: 'Street food', description: 'Crispy banana fritters made fresh throughout the afternoon, with a loyal neighbourhood following.', state: 'Selangor', district: 'Petaling', location: 'SS15, Subang Jaya', price: 'RM1 / piece', rating: 4.9, reviewCount: 328, likes: 1000000, sample: true },
+  { id: 'kuih-murni', name: 'Kuih Murni', category: 'Traditional kuih', description: 'Colourful kuih lapis, seri muka and onde-onde prepared in small batches every morning.', state: 'Selangor', district: 'Klang', location: 'Meru, Klang', price: 'RM2 / piece', rating: 4.8, reviewCount: 186, likes: 24800, sample: true },
+  { id: 'kopi-bukit', name: 'Kopi Bukit 18', category: 'Coffee & breakfast', description: 'A family-run breakfast stop serving local coffee, roti bakar and warm community energy.', state: 'Selangor', district: 'Hulu Langat', location: 'Batu 18, Hulu Langat', price: 'RM4.50 / cup', rating: 4.7, reviewCount: 142, likes: 17300, sample: true },
+  { id: 'bunga-sepang', name: 'Bunga Sepang Studio', category: 'Local craft', description: 'Hand-tied bouquets and locally inspired gifts for celebrations, small events and everyday moments.', state: 'Selangor', district: 'Sepang', location: 'Kota Warisan, Sepang', price: 'From RM25', rating: 4.9, reviewCount: 97, likes: 11900, sample: true },
+  { id: 'rotican-gombak', name: 'Roti Canai Pak Din', category: 'Street food', description: 'Flaky roti canai with dhal and sambal, served from a beloved morning stall near the hills.', state: 'Selangor', district: 'Gombak', location: 'Batu Caves, Gombak', price: 'RM1.50 / piece', rating: 4.8, reviewCount: 214, likes: 31600, sample: true },
+  { id: 'madu-selangor', name: 'Madu Kuala Selangor', category: 'Local produce', description: 'Small-batch local honey and pantry gifts sourced from beekeepers around the district.', state: 'Selangor', district: 'Kuala Selangor', location: 'Tanjong Karang, Kuala Selangor', price: 'RM18 / jar', rating: 4.6, reviewCount: 74, likes: 8600, sample: true },
+  { id: 'anyaman-hulu', name: 'Anyaman Hulu', category: 'Handmade goods', description: 'Woven baskets and practical homeware made with patient hands and local materials.', state: 'Selangor', district: 'Hulu Selangor', location: 'Kuala Kubu Bharu, Hulu Selangor', price: 'From RM12', rating: 4.9, reviewCount: 63, likes: 7400, sample: true },
+  { id: 'nasi-lemak-sabak', name: 'Nasi Lemak Sawah', category: 'Street food', description: 'Fragrant nasi lemak wrapped for the morning crowd, with sambal that keeps regulars coming back.', state: 'Selangor', district: 'Sabak Bernam', location: 'Sekinchan, Sabak Bernam', price: 'RM3.50 / pack', rating: 4.8, reviewCount: 121, likes: 14500, sample: true },
+  { id: 'tempeh-langat', name: 'Tempeh Kuala Langat', category: 'Local produce', description: 'Fresh tempeh and soy snacks made locally and delivered to nearby communities.', state: 'Selangor', district: 'Kuala Langat', location: 'Banting, Kuala Langat', price: 'RM6 / pack', rating: 4.7, reviewCount: 88, likes: 10200, sample: true },
+]

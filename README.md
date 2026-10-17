@@ -1,6 +1,6 @@
 # AIM OPP
 
-AIM OPP (AIM opportunities) is a Malaysia-focused discovery prototype for opportunities, community programmes, spiritual activities, scholarships, workshops and legitimate short-term work. The home flow starts with a simple area form, then reveals one matching opportunity at a time.
+AIM OPP (AIM opportunities) is a local discovery prototype for Selangor opportunities, community programmes, spiritual activities, scholarships and legitimate short-term work, with a separate local shop directory. The home flow starts with a simple area form, then reveals matching opportunities; local businesses have their own sidebar section.
 
 ## Run locally
 
@@ -14,7 +14,7 @@ npm run dev
 ## Structure
 
 - `src/types.ts` contains the domain models.
-- `src/data/opportunities.ts` is the local sample repository. Replace this module with an API adapter when verified listings are available.
+- `src/data/opportunities.ts` is the local sample repository, including job examples across all nine Selangor districts and shop examples with ratings, likes, prices and locations. Replace this module with an API adapter when verified listings are available.
 - `src/utils/filterOpportunities.ts` owns filtering and sorting so UI components do not encode business rules.
 - `src/styles/tokens.css` is the central theme layer for colors, surfaces, spacing, radii, shadows and motion.
 - `src/styles/global.css` contains the reset, spatial primitives and responsive composition.
@@ -23,4 +23,4 @@ The interface uses layered surfaces intentionally: atmospheric canvas, workspace
 
 ## Limitations and next steps
 
-All records are clearly marked sample/demo data and use illustrative links. A production version should add a verified opportunity feed, moderation and expiry workflow, accurate geographic data, authentication, profile-based recommendations, and a database. Saved paths currently use browser `localStorage` and remain device-local.
+All records are clearly marked sample/demo data and use illustrative links. A production version should add a verified opportunity and business feed, moderation and expiry workflow, accurate geographic data, authentication, profile-based recommendations, recognition pathways for high-performing businesses, and a database. Saved paths currently use browser `localStorage` and remain device-local.

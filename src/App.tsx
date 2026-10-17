@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { ArrowUpRight, Bookmark, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, CircleUserRound, Clock, Compass, Heart, House, Landmark, Lock, MapPin, Search, SlidersHorizontal, Sparkles, Star, TrendingUp, Trophy, Users, X, Zap } from 'lucide-react'
-import { categories, interests, opportunities, states } from './data/opportunities'
+import { categories, districts, interests, opportunities, shops, states } from './data/opportunities'
 import { filterOpportunities } from './utils/filterOpportunities'
 import { badgeDefinitions } from './data/badges'
 import { demoPerson, demoProfile, demoSaved, type DemoPerson } from './data/demoProfile'
 import { POINTS, deriveStats, generateRating, loadProfile, saveProfile } from './utils/profile'
-import type { Filters, Opportunity, ProfileData, ProfileStats, ProjectEntry } from './types'
+import type { Filters, Opportunity, ProfileData, ProfileStats, ProjectEntry, Shop } from './types'
 import './styles/global.css'
 
-const initialFilters: Filters = { state: 'All Malaysia', district: '', category: 'All categories', education: '', budget: '', difficulty: '', audience: '', interest: '', search: '', sort: 'recommended' }
+const initialFilters: Filters = { state: 'Selangor', district: '', category: 'All categories', education: '', budget: '', difficulty: '', audience: '', interest: '', search: '', sort: 'recommended' }
 const iconFor: Record<Opportunity['category'], typeof Compass> = { Competition: Sparkles, Workshop: Landmark, Scholarship: Compass, Community: Heart, Spiritual: Landmark, 'Odd job': Users }
 
 function App() {
   const [filters, setFilters] = useState<Filters>(initialFilters)
-  const [view, setView] = useState<'discover' | 'saved' | 'profile'>('discover')
+  const [view, setView] = useState<'discover' | 'saved' | 'shops' | 'profile'>('discover')
   const [selected, setSelected] = useState<Opportunity | null>(null)
   const [step, setStep] = useState(0)
   const [showFilters, setShowFilters] = useState(false)
@@ -77,6 +77,13 @@ function App() {
   const visibleResults = results.slice(page * pageSize, (page + 1) * pageSize)
   const featuredOpportunity = opportunities.find((item) => item.featured) ?? opportunities[0]
   const showFeatured = view === 'discover' && results.some((item) => item.id === featuredOpportunity.id)
+  const visibleShops = useMemo(() => shops.filter((shop) => {
+    const matchesState = filters.state === 'All Malaysia' || shop.state === filters.state
+    const matchesDistrict = !filters.district || shop.district === filters.district
+    const query = filters.search.trim().toLowerCase()
+    const matchesSearch = !query || [shop.name, shop.category, shop.description, shop.location, shop.district].some((value) => value.toLowerCase().includes(query))
+    return matchesState && matchesDistrict && matchesSearch
+  }), [filters.district, filters.search, filters.state])
   const update = (key: keyof Filters, value: string) => { setPage(0); setFilters((current) => ({ ...current, [key]: value })) }
   const selectSignal = (interest: string) => {
     setFilters((current) => ({ ...current, interest, search: '' }))
@@ -98,6 +105,7 @@ function App() {
     setShowFilters(false)
   }
   const goHome = () => { setStep(0); setView('discover'); setShowFilters(false); setSelected(null); setPage(0) }
+  const goToShops = () => { setStep(3); setView('shops'); setShowFilters(false); setSelected(null); setPage(0) }
 
   useEffect(() => {
     const close = (event: KeyboardEvent) => {
@@ -117,6 +125,7 @@ function App() {
       <nav className="nav" aria-label="Main navigation">
         <button className={step === 0 && view === 'discover' ? 'active' : ''} onClick={goHome}><House size={16} /><span>Home</span></button>
         <button className={step >= 3 && view === 'discover' ? 'active' : ''} onClick={() => { setPage(0); setView('discover'); setStep(3) }}><Compass size={16} /><span>Discover</span></button>
+        <button className={view === 'shops' ? 'active' : ''} onClick={goToShops}><Landmark size={16} /><span>Local shops</span><b>{shops.length}</b></button>
         <button className={view === 'saved' ? 'active' : ''} onClick={() => { setPage(0); setView('saved'); setStep(3) }}><Bookmark size={16} /><span>Saved paths</span><b>{saved.length}</b></button>
       </nav>
       <div className="rail-divider" />
@@ -141,13 +150,14 @@ function App() {
 
       {view !== 'profile' && step === 2 && <Wizard title="Tune your opportunity search" description="Choose the same controls available in Discover, then explore your matching paths." label="Step 1 of 1" onClose={() => setStep(0)}><FilterControls filters={filters} update={update} /><button className="primary-button" onClick={() => setStep(3)}>Show my paths <ArrowUpRight size={16} /></button></Wizard>}
 
-      {view !== 'profile' && step >= 3 && <section className="programme-section">
+      {view !== 'profile' && view !== 'shops' && step >= 3 && <section className="programme-section">
         <div className="results-toolbar"><div><p className="eyebrow">Directory view / {view === 'saved' ? 'Saved paths' : 'All signals'}</p><h2>{view === 'saved' ? 'Your saved paths' : 'Opportunities worth your attention'}</h2><p className="programme-count">{results.length} {results.length === 1 ? 'path' : 'paths'} in the current view</p></div><div className="results-controls"><label className="discover-search"><Search size={15} /><input aria-label="Search discover results" value={discoverQuery} onChange={(event) => setDiscoverQuery(event.target.value)} placeholder="Search the directory" onKeyDown={(event) => { if (event.key === 'Enter') submitDiscoverSearch() }} /></label><button className="primary-button discover-search-button" onClick={submitDiscoverSearch}><Search size={15} /> Search</button><button className="control filter-trigger" onClick={() => setShowFilters(true)}><SlidersHorizontal size={15} /> Refine view</button></div></div>
         {showFeatured && <FeaturedOpportunity opportunity={featuredOpportunity} onOpen={() => setSelected(featuredOpportunity)} onSave={() => toggleSaved(featuredOpportunity.id)} saved={saved.includes(featuredOpportunity.id)} />}
         <div className="results-head"><div><span className="section-label">Browse the collection</span><h3>{hasFilters ? 'Filtered results' : 'Freshly mapped paths'}</h3></div><label className="sort">Sort by <select value={filters.sort} onChange={(event) => update('sort', event.target.value)}><option value="recommended">Recommended</option><option value="soonest">Soonest</option><option value="free">Free first</option></select></label></div>
         <div className="opportunity-grid">{visibleResults.length ? visibleResults.map((item) => <OpportunityCard key={item.id} opportunity={item} saved={saved.includes(item.id)} onSave={() => toggleSaved(item.id)} onOpen={() => setSelected(item)} />) : <div className="empty"><Compass size={25} /><strong>No paths on this setting yet.</strong><span>Try clearing a filter or searching another signal.</span><button className="clear" onClick={clear}>Reset view</button></div>}</div>
         {pageCount > 1 && <div className="pagination"><button className="control" disabled={page === 0} onClick={() => setPage((current) => current - 1)}><ChevronLeft size={15} /> Previous</button><span>Page {page + 1} of {pageCount}</span><button className="control" disabled={page === pageCount - 1} onClick={() => setPage((current) => current + 1)}>Next <ChevronRight size={15} /></button></div>}
       </section>}
+      {view === 'shops' && <ShopDirectory filters={filters} update={update} shops={visibleShops} clear={clear} />}
     </main>
 
     {showFilters && <div className="filter-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setShowFilters(false)}><section className="filter-panel" role="dialog" aria-modal="true"><div className="filter-panel-head"><div><p className="eyebrow">Control surface</p><h2>Refine your view</h2></div><button className="icon-button" onClick={() => setShowFilters(false)} aria-label="Close filters"><X size={18} /></button></div><FilterControls filters={filters} update={update} /><div className="filter-actions"><button className="clear" onClick={clear}>Clear all</button><button className="primary-button" onClick={() => setShowFilters(false)}>Apply settings <ArrowUpRight size={15} /></button></div></section></div>}
@@ -163,7 +173,8 @@ function FilterSelect({ label, value, onChange, options }: { label: string; valu
 }
 
 function FilterControls({ filters, update }: { filters: Filters; update: (key: keyof Filters, value: string) => void }) {
-  return <div className="filters shared-filters"><FilterSelect label="State" value={filters.state} onChange={(value) => update('state', value)} options={states} /><FilterSelect label="Category" value={filters.category} onChange={(value) => update('category', value)} options={categories} /><FilterSelect label="Interest" value={filters.interest} onChange={(value) => update('interest', value)} options={interests} /><FilterSelect label="Education" value={filters.education} onChange={(value) => update('education', value)} options={['Secondary', 'Pre-university', 'University', 'Graduate', 'Open to all']} /><FilterSelect label="Difficulty" value={filters.difficulty} onChange={(value) => update('difficulty', value)} options={['Beginner', 'Intermediate', 'Advanced']} /><FilterSelect label="Budget" value={filters.budget} onChange={(value) => update('budget', value)} options={['Free', 'Paid']} /><label className="filter-field filter-search-field"><span>Search</span><div className="filter-search"><Search size={14} /><input aria-label="Search opportunities" value={filters.search} onChange={(event) => update('search', event.target.value)} placeholder="Skills, providers, or titles" /></div></label></div>
+  const districtOptions = filters.state === 'All Malaysia' ? districts : districts.filter((district) => opportunities.some((item) => item.state === filters.state && item.district === district))
+  return <div className="filters shared-filters"><FilterSelect label="State" value={filters.state} onChange={(value) => { update('state', value); update('district', '') }} options={states} /><FilterSelect label="District" value={filters.district} onChange={(value) => update('district', value)} options={districtOptions} /><FilterSelect label="Category" value={filters.category} onChange={(value) => update('category', value)} options={categories} /><FilterSelect label="Interest" value={filters.interest} onChange={(value) => update('interest', value)} options={interests} /><FilterSelect label="Education" value={filters.education} onChange={(value) => update('education', value)} options={['Secondary', 'Pre-university', 'University', 'Graduate', 'Open to all']} /><FilterSelect label="Difficulty" value={filters.difficulty} onChange={(value) => update('difficulty', value)} options={['Beginner', 'Intermediate', 'Advanced']} /><FilterSelect label="Budget" value={filters.budget} onChange={(value) => update('budget', value)} options={['Free', 'Paid']} /><label className="filter-field filter-search-field"><span>Search</span><div className="filter-search"><Search size={14} /><input aria-label="Search opportunities" value={filters.search} onChange={(event) => update('search', event.target.value)} placeholder="Skills, providers, shops, or titles" /></div></label></div>
 }
 
 function Wizard({ title, description, label, onClose, children }: { title: string; description: string; label: string; onClose: () => void; children: ReactNode }) {
@@ -177,6 +188,21 @@ function FeaturedOpportunity({ opportunity, saved, onSave, onOpen }: { opportuni
 function OpportunityCard({ opportunity, saved, onSave, onOpen }: { opportunity: Opportunity; saved: boolean; onSave: () => void; onOpen: () => void }) {
   const Icon = iconFor[opportunity.category]
   return <article className="opportunity"><div className="opportunity-top"><div className="category-icon"><Icon size={17} /></div><button className={`bookmark ${saved ? 'saved' : ''}`} aria-label={saved ? `Remove ${opportunity.title} from saved` : `Save ${opportunity.title}`} onClick={onSave}><Bookmark size={17} fill={saved ? 'currentColor' : 'none'} /></button></div><span className="card-index">{opportunity.category}</span><h3>{opportunity.title}</h3><p className="provider">{opportunity.provider}</p><div className="opportunity-footer"><div><div><MapPin size={11} /> {opportunity.state}</div><div><CalendarDays size={11} /> {opportunity.date}</div></div><div className="card-end"><div className="fee">{opportunity.fee === 0 ? 'Free' : `RM${opportunity.fee}`}</div><button className="details-button" onClick={onOpen}>Details <ChevronRight size={13} /></button></div></div></article>
+}
+
+function ShopCard({ shop }: { shop: Shop }) {
+  return <article className="shop-card"><div className="shop-card-top"><div><span className="tag"><Heart size={11} /> Local shop</span><h3>{shop.name}</h3><p className="provider">{shop.category}</p></div><div className="shop-rating"><Star size={14} fill="currentColor" /> {shop.rating.toFixed(1)}<small>{shop.reviewCount} ratings</small></div></div><p className="shop-description">{shop.description}</p><div className="shop-metrics"><span><Heart size={13} /> <strong>{formatLikes(shop.likes)}</strong> likes</span><span className="fee">{shop.price}</span></div><div className="shop-location-line"><MapPin size={13} /> {shop.location}<span>·</span>{shop.district}</div><div className="shop-recognition"><TrendingUp size={13} /> High recognition can open doors with bigger companies.</div></article>
+}
+
+function ShopDirectory({ filters, update, shops: visibleShops, clear }: { filters: Filters; update: (key: keyof Filters, value: string) => void; shops: Shop[]; clear: () => void }) {
+  const shopDistricts = districts.filter((district) => shops.some((shop) => shop.district === district) || district === filters.district)
+  return <section className="shop-page"><div className="results-toolbar"><div><p className="eyebrow">Local business directory / Selangor</p><h2>Shops worth discovering</h2><p className="programme-count">Support local businesses and help great work get noticed.</p></div><span className="shop-location"><MapPin size={13} /> {filters.district || filters.state}</span></div><div className="shop-controls"><FilterSelect label="State" value={filters.state} onChange={(value) => { update('state', value); update('district', '') }} options={states} /><FilterSelect label="District" value={filters.district} onChange={(value) => update('district', value)} options={shopDistricts} /><label className="discover-search shop-search"><Search size={15} /><input aria-label="Search local shops" value={filters.search} onChange={(event) => update('search', event.target.value)} placeholder="Search local shops" /></label><button className="control" onClick={clear}>Reset</button></div><div className="shop-grid">{visibleShops.length ? visibleShops.map((shop) => <ShopCard key={shop.id} shop={shop} />) : <div className="empty"><MapPin size={25} /><strong>No local shops on this setting yet.</strong><span>Try another Selangor district.</span><button className="clear" onClick={clear}>Reset view</button></div>}</div></section>
+}
+
+function formatLikes(likes: number) {
+  if (likes >= 1000000) return `${(likes / 1000000).toFixed(likes % 1000000 === 0 ? 0 : 1)}M`
+  if (likes >= 1000) return `${(likes / 1000).toFixed(likes % 1000 === 0 ? 0 : 1)}k`
+  return likes.toString()
 }
 
 function DetailDrawer({ opportunity, saved, onSave, onClose, entry, onRegister, onComplete }: { opportunity: Opportunity; saved: boolean; onSave: () => void; onClose: () => void; entry?: ProjectEntry; onRegister: () => void; onComplete: () => void }) {
