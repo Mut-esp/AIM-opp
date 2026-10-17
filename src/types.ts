@@ -23,6 +23,10 @@ export interface Opportunity {
   featured?: boolean
   sample: boolean
   registrationUrl: string
+  /** Optional cover image URL for the opportunity. Can be a remote URL (e.g. Unsplash)
+   *  or a path to a local asset in /public (e.g. '/images/foo.jpg'). When absent, a
+   *  category-themed SVG placeholder is rendered instead. */
+  image?: string
 }
 
 export interface Shop {
