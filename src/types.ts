@@ -25,6 +25,57 @@ export interface Opportunity {
   registrationUrl: string
 }
 
+export interface OrganizerRating {
+  stars: number
+  feedback: string
+  organizer: string
+  date: string
+}
+
+export interface ProjectEntry {
+  id: string
+  status: 'registered' | 'completed'
+  registeredAt: string
+  completedAt?: string
+  rating?: OrganizerRating
+}
+
+export interface ProfileData {
+  entries: Record<string, ProjectEntry>
+}
+
+export interface LevelInfo {
+  level: number
+  title: string
+  xp: number
+  currentLevelFloor: number
+  nextLevelAt: number | null
+  intoLevel: number
+  levelSpan: number
+  progress: number
+}
+
+export interface ProfileStats {
+  xp: number
+  level: LevelInfo
+  registeredCount: number
+  completedCount: number
+  inProgressCount: number
+  savedCount: number
+  categoriesCompleted: number
+  ratings: OrganizerRating[]
+  averageRating: number | null
+  totalRatings: number
+}
+
+export interface Badge {
+  id: string
+  name: string
+  description: string
+  icon: string
+  tier: 'bronze' | 'silver' | 'gold'
+}
+
 export interface Filters {
   state: string
   district: string

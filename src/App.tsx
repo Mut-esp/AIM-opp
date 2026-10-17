@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { ArrowUpRight, Bookmark, CalendarDays, ChevronLeft, ChevronRight, CircleUserRound, Compass, Heart, House, Landmark, MapPin, Search, SlidersHorizontal, Sparkles, Users, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { ArrowUpRight, Bookmark, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, CircleUserRound, Clock, Compass, Heart, House, Landmark, Lock, MapPin, Search, SlidersHorizontal, Sparkles, Star, TrendingUp, Trophy, Users, X, Zap } from 'lucide-react'
 import { categories, interests, opportunities, states } from './data/opportunities'
 import { filterOpportunities } from './utils/filterOpportunities'
-import type { Filters, Opportunity } from './types'
+import { badgeDefinitions } from './data/badges'
+import { demoPerson, demoProfile, demoSaved, type DemoPerson } from './data/demoProfile'
+import { POINTS, deriveStats, generateRating, loadProfile, saveProfile } from './utils/profile'
+import type { Filters, Opportunity, ProfileData, ProfileStats, ProjectEntry } from './types'
 import './styles/global.css'
 
 const initialFilters: Filters = { state: 'All Malaysia', district: '', category: 'All categories', education: '', budget: '', difficulty: '', audience: '', interest: '', search: '', sort: 'recommended' }
@@ -10,7 +13,7 @@ const iconFor: Record<Opportunity['category'], typeof Compass> = { Competition: 
 
 function App() {
   const [filters, setFilters] = useState<Filters>(initialFilters)
-  const [view, setView] = useState<'discover' | 'saved'>('discover')
+  const [view, setView] = useState<'discover' | 'saved' | 'profile'>('discover')
   const [selected, setSelected] = useState<Opportunity | null>(null)
   const [step, setStep] = useState(0)
   const [showFilters, setShowFilters] = useState(false)
@@ -18,9 +21,55 @@ function App() {
   const [homeQuery, setHomeQuery] = useState('')
   const [discoverQuery, setDiscoverQuery] = useState('')
   const [saved, setSaved] = useState<string[]>(() => {
-    try { return JSON.parse(localStorage.getItem('pathway-saved') ?? '[]') }
-    catch { return [] }
+    try {
+      const stored = localStorage.getItem('pathway-saved')
+      if (stored) return JSON.parse(stored)
+      // Seed the demo person's saved paths for presentation.
+      localStorage.setItem('pathway-saved', JSON.stringify(demoSaved))
+      return demoSaved
+    } catch { return demoSaved }
   })
+  const [profile, setProfile] = useState<ProfileData>(() => {
+    const stored = loadProfile()
+    if (Object.keys(stored.entries).length > 0) return stored
+    // Seed the demo person's progress for presentation.
+    saveProfile(demoProfile)
+    return demoProfile
+  })
+  const [toasts, setToasts] = useState<Array<{ id: number; msg: string }>>([])
+  const categoryById = useMemo(() => {
+    const map: Record<string, Opportunity['category']> = {}
+    opportunities.forEach((item) => { map[item.id] = item.category })
+    return map
+  }, [])
+  const stats = useMemo(() => deriveStats(profile, saved.length, (id) => categoryById[id]), [profile, saved.length, categoryById])
+  const earnedBadges = useMemo(() => badgeDefinitions.filter((badge) => badge.earned(stats)), [stats])
+  const pushToast = (msg: string) => {
+    const id = Date.now() + Math.random()
+    setToasts((current) => [...current, { id, msg }])
+    window.setTimeout(() => setToasts((current) => current.filter((toast) => toast.id !== id)), 3600)
+  }
+  const knownBadges = useRef(new Set(earnedBadges.map((badge) => badge.id)))
+  useEffect(() => {
+    earnedBadges.forEach((badge) => {
+      if (!knownBadges.current.has(badge.id)) pushToast(`Badge unlocked — ${badge.name}`)
+    })
+    knownBadges.current = new Set(earnedBadges.map((badge) => badge.id))
+  }, [stats])
+  const registerFor = (opportunity: Opportunity) => {
+    if (profile.entries[opportunity.id]) return
+    const next: ProfileData = { entries: { ...profile.entries, [opportunity.id]: { id: opportunity.id, status: 'registered', registeredAt: new Date().toISOString() } } }
+    setProfile(next); saveProfile(next)
+    pushToast(`Registered · +${POINTS.register} XP`)
+  }
+  const completeProject = (opportunity: Opportunity) => {
+    const entry = profile.entries[opportunity.id]
+    if (!entry || entry.status === 'completed') return
+    const rating = generateRating(opportunity.id, opportunity.provider)
+    const next: ProfileData = { entries: { ...profile.entries, [opportunity.id]: { ...entry, status: 'completed', completedAt: new Date().toISOString(), rating } } }
+    setProfile(next); saveProfile(next)
+    pushToast(`Completed · rated ${rating.stars}★ · +${POINTS.complete + rating.stars * POINTS.perStar} XP`)
+  }
   const results = useMemo(() => filterOpportunities(view === 'saved' ? opportunities.filter((item) => saved.includes(item.id)) : opportunities, filters), [filters, saved, view])
   const hasFilters = Boolean(filters.search || filters.state !== 'All Malaysia' || filters.district || filters.category !== 'All categories' || filters.education || filters.budget || filters.difficulty || filters.audience || filters.interest)
   const pageSize = 4
@@ -71,23 +120,28 @@ function App() {
         <button className={view === 'saved' ? 'active' : ''} onClick={() => { setPage(0); setView('saved'); setStep(3) }}><Bookmark size={16} /><span>Saved paths</span><b>{saved.length}</b></button>
       </nav>
       <div className="rail-divider" />
-      <button className="profile-button" onClick={() => window.alert('Profile tools are coming in the next prototype milestone.')}><CircleUserRound size={16} /><span>My profile</span></button>
+      <button className={`profile-button ${view === 'profile' ? 'active' : ''}`} onClick={() => { setView('profile'); setShowFilters(false); setSelected(null) }}>
+        <CircleUserRound size={16} />
+        <span>My profile</span>
+        <b className="profile-level">Lv {stats.level.level}</b>
+      </button>
       <div className="sidebar-note"><span className="status-dot" />Live directory<br /><strong>Built for Malaysia</strong><br />Small signals. Better directions.</div>
     </aside>
 
-    <main className={`main ${step >= 3 ? 'results-mode' : ''}`}>
+    <main className={`main ${step >= 3 || view === 'profile' ? 'results-mode' : ''}`}>
       <header className="topbar"><span className="topbar-kicker">AIM / 01</span><span className="topbar-status"><span className="status-dot" />Directory synced <span className="topbar-time">09:41 MYT</span></span></header>
-      {step < 3 && <><p className="eyebrow">A clearer way forward · Malaysia</p><div className="hero-row"><div><h1>Find your next <em>opportunity.</em></h1><p className="hero-copy">A considered directory of competitions, work, learning and community paths.</p></div>{step === 0 && <button className="primary-button find-job-button" onClick={() => setStep(2)}>Tune my search <ArrowUpRight size={16} /></button>}</div></>}
+      {view === 'profile' && <ProfilePage person={demoPerson} stats={stats} profile={profile} onOpen={(item) => setSelected(item)} onExplore={() => { setView('discover'); setStep(3); setPage(0) }} />}
+      {view !== 'profile' && step < 3 && <><p className="eyebrow">A clearer way forward · Malaysia</p><div className="hero-row"><div><h1>Find your next <em>opportunity.</em></h1><p className="hero-copy">A considered directory of competitions, work, learning and community paths.</p></div>{step === 0 && <button className="primary-button find-job-button" onClick={() => setStep(2)}>Tune my search <ArrowUpRight size={16} /></button>}</div></>}
 
-      {step === 0 && <section className="home-console">
+      {view !== 'profile' && step === 0 && <section className="home-console">
         <div className="console-head"><span className="console-index">01</span><div><strong>Start with a signal</strong><span>Search the directory, then refine at your own pace.</span></div><span className="console-light" /></div>
         <div className="home-search"><label className="search"><Search size={17} /><input value={homeQuery} onChange={(event) => setHomeQuery(event.target.value)} placeholder="Search skills, providers, or opportunities" /></label><button className="primary-button search-button" onClick={() => { setFilters((current) => ({ ...current, search: homeQuery })); setPage(0); setStep(2) }}>Search <Search size={15} /></button></div>
         <div className="quick-signals"><span>Try a signal</span>{['Technology', 'Community service', 'Career development'].map((item) => <button key={item} onClick={() => selectSignal(item)}>{item}</button>)}</div>
       </section>}
 
-      {step === 2 && <Wizard title="Tune your opportunity search" description="Choose the same controls available in Discover, then explore your matching paths." label="Step 1 of 1" onClose={() => setStep(0)}><FilterControls filters={filters} update={update} /><button className="primary-button" onClick={() => setStep(3)}>Show my paths <ArrowUpRight size={16} /></button></Wizard>}
+      {view !== 'profile' && step === 2 && <Wizard title="Tune your opportunity search" description="Choose the same controls available in Discover, then explore your matching paths." label="Step 1 of 1" onClose={() => setStep(0)}><FilterControls filters={filters} update={update} /><button className="primary-button" onClick={() => setStep(3)}>Show my paths <ArrowUpRight size={16} /></button></Wizard>}
 
-      {step >= 3 && <section className="programme-section">
+      {view !== 'profile' && step >= 3 && <section className="programme-section">
         <div className="results-toolbar"><div><p className="eyebrow">Directory view / {view === 'saved' ? 'Saved paths' : 'All signals'}</p><h2>{view === 'saved' ? 'Your saved paths' : 'Opportunities worth your attention'}</h2><p className="programme-count">{results.length} {results.length === 1 ? 'path' : 'paths'} in the current view</p></div><div className="results-controls"><label className="discover-search"><Search size={15} /><input aria-label="Search discover results" value={discoverQuery} onChange={(event) => setDiscoverQuery(event.target.value)} placeholder="Search the directory" onKeyDown={(event) => { if (event.key === 'Enter') submitDiscoverSearch() }} /></label><button className="primary-button discover-search-button" onClick={submitDiscoverSearch}><Search size={15} /> Search</button><button className="control filter-trigger" onClick={() => setShowFilters(true)}><SlidersHorizontal size={15} /> Refine view</button></div></div>
         {showFeatured && <FeaturedOpportunity opportunity={featuredOpportunity} onOpen={() => setSelected(featuredOpportunity)} onSave={() => toggleSaved(featuredOpportunity.id)} saved={saved.includes(featuredOpportunity.id)} />}
         <div className="results-head"><div><span className="section-label">Browse the collection</span><h3>{hasFilters ? 'Filtered results' : 'Freshly mapped paths'}</h3></div><label className="sort">Sort by <select value={filters.sort} onChange={(event) => update('sort', event.target.value)}><option value="recommended">Recommended</option><option value="soonest">Soonest</option><option value="free">Free first</option></select></label></div>
@@ -97,7 +151,8 @@ function App() {
     </main>
 
     {showFilters && <div className="filter-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setShowFilters(false)}><section className="filter-panel" role="dialog" aria-modal="true"><div className="filter-panel-head"><div><p className="eyebrow">Control surface</p><h2>Refine your view</h2></div><button className="icon-button" onClick={() => setShowFilters(false)} aria-label="Close filters"><X size={18} /></button></div><FilterControls filters={filters} update={update} /><div className="filter-actions"><button className="clear" onClick={clear}>Clear all</button><button className="primary-button" onClick={() => setShowFilters(false)}>Apply settings <ArrowUpRight size={15} /></button></div></section></div>}
-    {selected && <DetailDrawer opportunity={selected} saved={saved.includes(selected.id)} onSave={() => toggleSaved(selected.id)} onClose={() => setSelected(null)} />}
+    {selected && <DetailDrawer opportunity={selected} saved={saved.includes(selected.id)} onSave={() => toggleSaved(selected.id)} onClose={() => setSelected(null)} entry={profile.entries[selected.id]} onRegister={() => registerFor(selected)} onComplete={() => completeProject(selected)} />}
+    {toasts.length > 0 && <div className="toast-stack" aria-live="polite">{toasts.map((toast) => <div key={toast.id} className="toast"><Zap size={14} /> {toast.msg}</div>)}</div>}
   </div>
 }
 
@@ -124,10 +179,118 @@ function OpportunityCard({ opportunity, saved, onSave, onOpen }: { opportunity: 
   return <article className="opportunity"><div className="opportunity-top"><div className="category-icon"><Icon size={17} /></div><button className={`bookmark ${saved ? 'saved' : ''}`} aria-label={saved ? `Remove ${opportunity.title} from saved` : `Save ${opportunity.title}`} onClick={onSave}><Bookmark size={17} fill={saved ? 'currentColor' : 'none'} /></button></div><span className="card-index">{opportunity.category}</span><h3>{opportunity.title}</h3><p className="provider">{opportunity.provider}</p><div className="opportunity-footer"><div><div><MapPin size={11} /> {opportunity.state}</div><div><CalendarDays size={11} /> {opportunity.date}</div></div><div className="card-end"><div className="fee">{opportunity.fee === 0 ? 'Free' : `RM${opportunity.fee}`}</div><button className="details-button" onClick={onOpen}>Details <ChevronRight size={13} /></button></div></div></article>
 }
 
-function DetailDrawer({ opportunity, saved, onSave, onClose }: { opportunity: Opportunity; saved: boolean; onSave: () => void; onClose: () => void }) {
+function DetailDrawer({ opportunity, saved, onSave, onClose, entry, onRegister, onComplete }: { opportunity: Opportunity; saved: boolean; onSave: () => void; onClose: () => void; entry?: ProjectEntry; onRegister: () => void; onComplete: () => void }) {
   const Icon = iconFor[opportunity.category]
   const safeUrl = /^https?:\/\//i.test(opportunity.registrationUrl) ? opportunity.registrationUrl : null
-  return <div className="drawer-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}><aside className="drawer" role="dialog" aria-modal="true" aria-labelledby="detail-title"><button className="icon-button drawer-close" aria-label="Close details" onClick={onClose}><X /></button><div className="category-icon"><Icon size={20} /></div><span className="tag drawer-tag">{opportunity.category}</span><h2 id="detail-title">{opportunity.title}</h2><p className="provider">{opportunity.provider} · {opportunity.state}, {opportunity.district}</p><p className="description">{opportunity.description}</p><div className="detail-list"><div><CalendarDays /><span><strong>{opportunity.date}</strong><br />Registration closes {opportunity.deadline}</span></div><div><MapPin /><span><strong>{opportunity.venue}</strong><br />{opportunity.format}</span></div><div><Users /><span><strong>{opportunity.audience}</strong><br />{opportunity.difficulty} level · {opportunity.fee === 0 ? 'Free' : `RM${opportunity.fee}`}</span></div><div><Heart /><span><strong>What to bring</strong><br />{opportunity.materials}</span></div></div>{safeUrl ? <a className="primary-button" href={safeUrl} target="_blank" rel="noreferrer noopener">View registration link <ArrowUpRight size={16} /></a> : <p>Registration link unavailable.</p>}<button className="control save-button" onClick={onSave}><Bookmark size={15} fill={saved ? 'currentColor' : 'none'} /> {saved ? 'Saved to your paths' : 'Save this path'}</button><p className="sample-note">Sample opportunity: this prototype record is for demonstration only. Details are not verified.</p></aside></div>
+  const status = entry?.status
+  return <div className="drawer-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}><aside className="drawer" role="dialog" aria-modal="true" aria-labelledby="detail-title"><button className="icon-button drawer-close" aria-label="Close details" onClick={onClose}><X /></button><div className="category-icon"><Icon size={20} /></div><span className="tag drawer-tag">{opportunity.category}</span><h2 id="detail-title">{opportunity.title}</h2><p className="provider">{opportunity.provider} · {opportunity.state}, {opportunity.district}</p><p className="description">{opportunity.description}</p><div className="detail-list"><div><CalendarDays /><span><strong>{opportunity.date}</strong><br />Registration closes {opportunity.deadline}</span></div><div><MapPin /><span><strong>{opportunity.venue}</strong><br />{opportunity.format}</span></div><div><Users /><span><strong>{opportunity.audience}</strong><br />{opportunity.difficulty} level · {opportunity.fee === 0 ? 'Free' : `RM${opportunity.fee}`}</span></div><div><Heart /><span><strong>What to bring</strong><br />{opportunity.materials}</span></div></div>
+
+    <div className="progress-block">
+      {!status && <>
+        <p className="progress-hint">Register to track this path and start earning points.</p>
+        <button className="primary-button" onClick={onRegister}><Zap size={15} /> Register & track · +{POINTS.register} XP</button>
+      </>}
+      {status === 'registered' && <>
+        <p className="progress-hint"><Clock size={14} /> Registered — mark it complete once you've finished to get your organizer rating.</p>
+        <button className="primary-button" onClick={onComplete}><CheckCircle2 size={15} /> Mark as complete · +{POINTS.complete}+ XP</button>
+      </>}
+      {status === 'completed' && entry?.rating && <div className="rating-card">
+        <div className="rating-card-head"><span className="tag completed-tag"><CheckCircle2 size={12} /> Completed</span><StarRating value={entry.rating.stars} /></div>
+        <p className="rating-feedback">“{entry.rating.feedback}”</p>
+        <p className="rating-by">— {entry.rating.organizer}</p>
+      </div>}
+      {safeUrl ? <a className="control save-button" href={safeUrl} target="_blank" rel="noreferrer noopener">Open official registration link <ArrowUpRight size={15} /></a> : null}
+    </div>
+
+    <button className="control save-button" onClick={onSave}><Bookmark size={15} fill={saved ? 'currentColor' : 'none'} /> {saved ? 'Saved to your paths' : 'Save this path'}</button><p className="sample-note">Sample opportunity: this prototype record is for demonstration only. Ratings and points are mock data stored on this device.</p></aside></div>
+}
+
+function StarRating({ value, size = 15 }: { value: number; size?: number }) {
+  return <span className="star-rating" aria-label={`${value} out of 5 stars`}>
+    {[1, 2, 3, 4, 5].map((n) => {
+      const fill = Math.max(0, Math.min(1, value - (n - 1)))
+      return <span key={n} className="star-slot" style={{ width: size, height: size }}>
+        <Star size={size} className="star-bg" />
+        <span className="star-fg" style={{ width: `${fill * 100}%` }}><Star size={size} fill="currentColor" /></span>
+      </span>
+    })}
+  </span>
+}
+
+function StatTile({ icon, value, label, accent }: { icon: ReactNode; value: ReactNode; label: string; accent?: boolean }) {
+  return <div className={`stat-tile ${accent ? 'stat-accent' : ''}`}><div className="stat-icon">{icon}</div><div className="stat-value">{value}</div><div className="stat-label">{label}</div></div>
+}
+
+function ProfilePage({ person, stats, profile, onOpen, onExplore }: { person: DemoPerson; stats: ProfileStats; profile: ProfileData; onOpen: (item: Opportunity) => void; onExplore: () => void }) {
+  const level = stats.level
+  const ringCircumference = 2 * Math.PI * 52
+  const activity = useMemo(() => {
+    const byId: Record<string, Opportunity> = {}
+    opportunities.forEach((item) => { byId[item.id] = item })
+    return Object.values(profile.entries)
+      .map((entry) => ({ entry, opportunity: byId[entry.id] }))
+      .filter((row) => row.opportunity)
+      .sort((a, b) => (b.entry.completedAt ?? b.entry.registeredAt).localeCompare(a.entry.completedAt ?? a.entry.registeredAt))
+  }, [profile])
+  const xpToNext = level.nextLevelAt !== null ? level.nextLevelAt - level.xp : 0
+
+  return <section className="profile-page">
+    <section className="profile-hero">
+      <div className="profile-identity">
+        <div className="avatar" aria-hidden="true">{person.initials}</div>
+        <div className="identity-copy">
+          <h1>{person.name}</h1>
+          <p className="identity-headline">{person.headline}</p>
+          <p className="identity-meta"><MapPin size={13} /> {person.location}<span className="dot-sep">·</span>{person.handle}<span className="dot-sep">·</span>{person.joined}</p>
+          <span className="level-chip"><Trophy size={13} /> Level {level.level} · {level.title}</span>
+        </div>
+        <div className="level-ring" role="img" aria-label={`Level ${level.level}, ${Math.round(level.progress * 100)} percent to next level`}>
+          <svg viewBox="0 0 120 120" width="112" height="112">
+            <circle cx="60" cy="60" r="52" className="ring-track" />
+            <circle cx="60" cy="60" r="52" className="ring-fill" strokeDasharray={ringCircumference} strokeDashoffset={ringCircumference * (1 - level.progress)} transform="rotate(-90 60 60)" />
+          </svg>
+          <div className="level-ring-center"><span className="level-num">{level.level}</span><span className="level-word">LEVEL</span></div>
+        </div>
+      </div>
+      <div className="xp-bar" role="img" aria-label={`${level.xp} total XP`}><span className="xp-fill" style={{ width: `${level.progress * 100}%` }} /></div>
+      <div className="xp-footer">
+        <p className="xp-line"><Zap size={14} /> <strong>{level.xp.toLocaleString()} XP</strong>{level.nextLevelAt !== null ? <span className="muted"> · {xpToNext.toLocaleString()} XP to Level {level.level + 1}</span> : <span className="muted"> · max tier reached</span>}</p>
+        <button className="primary-button" onClick={onExplore}><Compass size={15} /> Find a project to grind</button>
+      </div>
+    </section>
+
+    <div className="stat-row">
+      <StatTile icon={<Zap size={18} />} value={level.xp.toLocaleString()} label="Total XP" accent />
+      <StatTile icon={<CheckCircle2 size={18} />} value={stats.completedCount} label="Completed" />
+      <StatTile icon={<Clock size={18} />} value={stats.inProgressCount} label="In progress" />
+      <StatTile icon={<Bookmark size={18} />} value={stats.savedCount} label="Saved" />
+      <StatTile icon={<Star size={18} />} value={stats.averageRating !== null ? stats.averageRating.toFixed(1) : '—'} label={`Avg rating${stats.totalRatings ? ` · ${stats.totalRatings}` : ''}`} />
+      <StatTile icon={<TrendingUp size={18} />} value={stats.categoriesCompleted} label="Categories" />
+    </div>
+
+    <section className="profile-block">
+      <div className="profile-block-head"><div><span className="section-label">Collection</span><h3>Badges</h3></div><p className="muted">{badgeDefinitions.filter((b) => b.earned(stats)).length} of {badgeDefinitions.length} unlocked</p></div>
+      <div className="badge-grid">{badgeDefinitions.map((badge) => {
+        const earned = badge.earned(stats)
+        const BadgeIcon = badge.icon
+        const prog = Math.round(badge.progress(stats) * 100)
+        return <div key={badge.id} className={`badge ${earned ? `earned tier-${badge.tier}` : 'locked'}`} title={badge.description}>
+          <div className="badge-icon">{earned ? <BadgeIcon size={22} /> : <Lock size={18} />}</div>
+          <div className="badge-name">{badge.name}</div>
+          <div className="badge-desc">{badge.description}</div>
+          {!earned && <div className="badge-progress"><span style={{ width: `${prog}%` }} /></div>}
+        </div>
+      })}</div>
+    </section>
+
+    <section className="profile-block">
+      <div className="profile-block-head"><div><span className="section-label">History</span><h3>Your activity</h3></div></div>
+      {activity.length === 0 ? <div className="empty profile-empty"><Trophy size={24} /><strong>No projects yet.</strong><span>Register for an opportunity to start your streak.</span><button className="clear" onClick={onExplore}>Browse opportunities</button></div> : <ul className="activity-list">{activity.map(({ entry, opportunity }) => {
+        const Icon = iconFor[opportunity.category]
+        return <li key={entry.id} className="activity-row"><button className="activity-main" onClick={() => onOpen(opportunity)}><span className="category-icon activity-icon"><Icon size={16} /></span><span className="activity-copy"><strong>{opportunity.title}</strong><small>{opportunity.provider} · {opportunity.category}</small></span></button><span className="activity-end">{entry.status === 'completed' && entry.rating ? <><StarRating value={entry.rating.stars} size={13} /><span className="status-pill done"><CheckCircle2 size={12} /> Completed</span></> : <span className="status-pill ongoing"><Clock size={12} /> Registered</span>}</span></li>
+      })}</ul>}
+    </section>
+  </section>
 }
 
 export default App
