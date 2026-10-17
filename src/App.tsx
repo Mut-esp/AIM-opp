@@ -126,7 +126,7 @@ function App() {
         <button className={step === 0 && view === 'discover' ? 'active' : ''} onClick={goHome}><House size={16} /><span>Home</span></button>
         <button className={step >= 3 && view === 'discover' ? 'active' : ''} onClick={() => { setPage(0); setView('discover'); setStep(3) }}><Compass size={16} /><span>Discover</span></button>
         <button className={view === 'shops' ? 'active' : ''} onClick={goToShops}><Landmark size={16} /><span>Local shops</span><b>{shops.length}</b></button>
-        <button className={view === 'saved' ? 'active' : ''} onClick={() => { setPage(0); setView('saved'); setStep(3) }}><Bookmark size={16} /><span>Saved paths</span><b>{saved.length}</b></button>
+        <button className={view === 'saved' ? 'active' : ''} onClick={() => { setPage(0); setFilters((current) => ({ ...current, state: 'All Malaysia', district: '' })); setView('saved'); setStep(3) }}><Bookmark size={16} /><span>Saved paths</span><b>{saved.length}</b></button>
       </nav>
       <div className="rail-divider" />
       <button className={`profile-button ${view === 'profile' ? 'active' : ''}`} onClick={() => { setView('profile'); setShowFilters(false); setSelected(null) }}>
@@ -144,7 +144,7 @@ function App() {
 
       {view !== 'profile' && step === 0 && <section className="home-console">
         <div className="console-head"><span className="console-index">01</span><div><strong>Start with a signal</strong><span>Search the directory, then refine at your own pace.</span></div><span className="console-light" /></div>
-        <div className="home-search"><label className="search"><Search size={17} /><input value={homeQuery} onChange={(event) => setHomeQuery(event.target.value)} placeholder="Search skills, providers, or opportunities" /></label><button className="primary-button search-button" onClick={() => { setFilters((current) => ({ ...current, search: homeQuery })); setPage(0); setStep(2) }}>Search <Search size={15} /></button></div>
+        <div className="home-search"><label className="search"><Search size={17} /><input value={homeQuery} onChange={(event) => setHomeQuery(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { setFilters((current) => ({ ...current, search: homeQuery })); setPage(0); setStep(3) } }} placeholder="Search skills, providers, or opportunities" /></label><button className="primary-button search-button" onClick={() => { setFilters((current) => ({ ...current, search: homeQuery })); setPage(0); setStep(3) }}>Search <Search size={15} /></button></div>
         <div className="quick-signals"><span>Try a signal</span>{['Technology', 'Community service', 'Career development'].map((item) => <button key={item} onClick={() => selectSignal(item)}>{item}</button>)}</div>
       </section>}
 
