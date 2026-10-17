@@ -1,13 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="AIM OPP">
-  <defs>
-    <linearGradient id="aimBg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#e3a860"/>
-      <stop offset="1" stop-color="#b86f2d"/>
-    </linearGradient>
-  </defs>
-  <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#aimBg)"/>
-  <!-- compass needle: "aim" -->
-  <polygon points="32,12 42,31 22,31" fill="#fffaf1"/>
-  <polygon points="32,52 42,33 22,33" fill="#fffaf1" opacity="0.5"/>
-  <circle cx="32" cy="32" r="6" fill="#b86f2d" stroke="#fffaf1" stroke-width="3"/>
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="#1F1F1C"/>
+  <!-- Amber gauge arc: ~225° to ~50° through the top -->
+  <path d="M 18.3 47.7 A 18 18 0 0 1 42.6 21.2" stroke="#B86F2D" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+  <!-- Gray arc continuation: ~50° to ~10° -->
+  <path d="M 42.6 21.2 A 18 18 0 0 1 48.7 31.9" stroke="#6B6B65" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <!-- Needle shaft -->
+  <line x1="31" y1="35" x2="39.5" y2="25" stroke="#EEEAE2" stroke-width="2.2" stroke-linecap="round"/>
+  <!-- Needle arrowhead -->
+  <polygon points="43,21 37.5,24 40,28.5" fill="#EEEAE2"/>
+  <!-- Center pivot dot -->
+  <circle cx="31" cy="35" r="3.5" fill="#B86F2D"/>
+  <circle cx="31" cy="35" r="1.5" fill="#1F1F1C"/>
 </svg>

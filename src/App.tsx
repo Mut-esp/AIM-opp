@@ -232,11 +232,14 @@ function DetailDrawer({ opportunity, saved, onSave, onClose, entry, onRegister, 
 }
 
 function AimMark({ size = 20 }: { size?: number }) {
-  // The AIM OPP compass-needle glyph, drawn in currentColor to match the brand tile.
+  // The AIM OPP gauge mark — amber arc, gray extension, white needle, amber pivot.
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <polygon points="12,3 16,12 8,12" fill="currentColor" />
-    <polygon points="12,21 16,13 8,13" fill="currentColor" opacity="0.45" />
-    <circle cx="12" cy="12" r="2.4" fill="currentColor" />
+    <path d="M 6.8 18 A 6.8 6.8 0 0 1 16 7.8" stroke="#B86F2D" strokeWidth="2.2" strokeLinecap="round" />
+    <path d="M 16 7.8 A 6.8 6.8 0 0 1 18.5 12" stroke="#6B6B65" strokeWidth="1.6" strokeLinecap="round" />
+    <line x1="11.6" y1="13.2" x2="14.8" y2="9.4" stroke="#EEEAE2" strokeWidth="1.2" strokeLinecap="round" />
+    <polygon points="16.2,7.8 13.8,9.2 15,11" fill="#EEEAE2" />
+    <circle cx="11.6" cy="13.2" r="1.5" fill="#B86F2D" />
+    <circle cx="11.6" cy="13.2" r="0.6" fill="#1F1F1C" />
   </svg>
 }
 

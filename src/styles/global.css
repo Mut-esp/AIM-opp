@@ -10,7 +10,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .app-shell::before { content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .23; background-image: repeating-linear-gradient(100deg, transparent 0 4px, rgba(255,255,255,.23) 5px, transparent 7px); mix-blend-mode: soft-light; }
 .sidebar { position: fixed; z-index: 3; inset: 0 auto 0 0; display: flex; flex-direction: column; width: 238px; padding: 27px 19px; border-right: 1px solid rgba(38,37,33,.25); background: linear-gradient(155deg, #dedbd3, #bbb9b3); box-shadow: 8px 0 28px rgba(48,45,39,.11), inset -1px 0 rgba(255,255,255,.6); }
 .brand { display: flex; gap: 11px; align-items: center; padding: 3px 10px 47px; font-weight: 800; letter-spacing: .01em; }
-.brand-mark { display: grid; place-items: center; width: 35px; height: 35px; border: 1px solid #8f8d87; border-radius: 9px; color: var(--amber); background: linear-gradient(145deg, #f3f1eb, #b9b8b2); box-shadow: var(--shadow-raised); }
+.brand-mark { display: grid; place-items: center; width: 35px; height: 35px; border: 1px solid #3a3a36; border-radius: 9px; background: #1F1F1C; box-shadow: var(--shadow-raised); }
 .brand-text { font-size: 13px; }
 .brand small { display: block; margin-top: 3px; color: var(--ink-faint); font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .rail-label, .section-label, .console-index, .card-index { color: var(--ink-faint); font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
