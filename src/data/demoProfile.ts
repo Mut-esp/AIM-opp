@@ -11,9 +11,9 @@ export interface DemoPerson {
 }
 
 export const demoPerson: DemoPerson = {
-  name: 'Nurul Aisyah binti Rahman',
-  handle: '@nurulaisyah',
-  initials: 'NA',
+  name: 'Muhammad Imran Yusoff Bin Mutsanna',
+  handle: '@imran_yusof',
+  initials: 'MI',
   headline: 'Community builder · STEM mentor · chasing the next opportunity',
   location: 'Petaling Jaya, Selangor',
   joined: 'Member since Jan 2025',

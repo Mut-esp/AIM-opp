@@ -120,7 +120,7 @@ function App() {
 
   return <div className="app-shell">
     <aside className="sidebar">
-      <div className="brand"><div className="brand-mark"><Compass size={19} /></div><div className="brand-text">AIM OPP<small>Opportunity instrument</small></div></div>
+      <div className="brand"><div className="brand-mark"><AimMark size={21} /></div><div className="brand-text">AIM OPP<small>Opportunity instrument</small></div></div>
       <div className="rail-label">Workspace</div>
       <nav className="nav" aria-label="Main navigation">
         <button className={step === 0 && view === 'discover' ? 'active' : ''} onClick={goHome}><House size={16} /><span>Home</span></button>
@@ -229,6 +229,15 @@ function DetailDrawer({ opportunity, saved, onSave, onClose, entry, onRegister, 
     </div>
 
     <button className="control save-button" onClick={onSave}><Bookmark size={15} fill={saved ? 'currentColor' : 'none'} /> {saved ? 'Saved to your paths' : 'Save this path'}</button><p className="sample-note">Sample opportunity: this prototype record is for demonstration only. Ratings and points are mock data stored on this device.</p></aside></div>
+}
+
+function AimMark({ size = 20 }: { size?: number }) {
+  // The AIM OPP compass-needle glyph, drawn in currentColor to match the brand tile.
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <polygon points="12,3 16,12 8,12" fill="currentColor" />
+    <polygon points="12,21 16,13 8,13" fill="currentColor" opacity="0.45" />
+    <circle cx="12" cy="12" r="2.4" fill="currentColor" />
+  </svg>
 }
 
 function StarRating({ value, size = 15 }: { value: number; size?: number }) {
